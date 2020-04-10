@@ -6,22 +6,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiFactory {
+    private val client: OkHttpClient  = OkHttpClient()
+            .newBuilder()
+            .build()
 
-    val sampleApi: SampleApi by lazy {
-        initializeSampleApi()
-    }
+    private val retrofit = Retrofit.Builder()
+            .client(client)
+            .baseUrl(BuildConfig.SAMPLE_API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-    private fun initializeSampleApi (): SampleApi{
-        val client = OkHttpClient()
-                .newBuilder()
-                .build()
-
-        val retrofit = Retrofit.Builder()
-                .client(client)
-                .baseUrl(BuildConfig.SAMPLE_API_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
+    fun getSampleApi (): SampleApi{
         return retrofit.create(SampleApi::class.java)
     }
 }
