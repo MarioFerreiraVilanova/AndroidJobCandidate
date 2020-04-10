@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel
 import app.storytel.candidate.com.network.ApiFactory
 import app.storytel.candidate.com.network.models.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.lang.Exception
 
 class ScrollingActivityViewModel: ViewModel() {
 
@@ -25,15 +25,20 @@ class ScrollingActivityViewModel: ViewModel() {
     fun loadData(){
         postsAndImages.value = NetworkResource(true, null)
         GlobalScope.launch {
-            when (val posts = fetchPosts()){
-                is Result.Success -> {
-                    when (val images = fetchPhotos()){
-                        is Result.Success -> postsAndImages.postValue(NetworkResource(false, Result.Success(PostAndImages(posts.data, images.data))))
-                        is Result.Failure -> postsAndImages.postValue(NetworkResource(false, images))
+            try {
+                when (val posts = fetchPosts()){
+                    is Result.Success -> {
+                        when (val images = fetchPhotos()){
+                            is Result.Success -> postsAndImages.postValue(NetworkResource(false, Result.Success(PostAndImages(posts.data, images.data))))
+                            is Result.Failure -> postsAndImages.postValue(NetworkResource(false, images))
+                        }
                     }
+                    is Result.Failure -> postsAndImages.postValue(NetworkResource(false, posts))
                 }
-                is Result.Failure -> postsAndImages.postValue(NetworkResource(false, posts))
+            }catch (e: Exception){
+                postsAndImages.postValue(NetworkResource(false, Result.Failure(e)))
             }
+
         }
     }
 

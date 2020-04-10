@@ -1,6 +1,5 @@
 package app.storytel.candidate.com
 
-import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -12,10 +11,12 @@ import app.storytel.candidate.com.PostAdapter.PostViewHolder
 import app.storytel.candidate.com.network.models.Photo
 import app.storytel.candidate.com.network.models.Post
 import app.storytel.candidate.com.network.models.PostAndImages
-import com.bumptech.glide.RequestManager
+import com.bumptech.glide.Glide
 import kotlin.random.Random
 
-class PostAdapter(private val mRequestManager: RequestManager, private val mActivity: Activity) : RecyclerView.Adapter<PostViewHolder>() {
+class PostAdapter(
+        private val onItemClicked: ((Post, Photo) -> Unit)
+) : RecyclerView.Adapter<PostViewHolder>() {
     private var mData: PostAndImages = PostAndImages(ArrayList(), ArrayList())
 
     override fun getItemCount() = mData.mPosts.size
@@ -25,8 +26,12 @@ class PostAdapter(private val mRequestManager: RequestManager, private val mActi
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        holder.bind(mData.mPosts[position], mData.mPhotos[Random.nextInt(mData.mPhotos.size - 1)])
-        holder.itemView.setOnClickListener { mActivity.startActivity(Intent(mActivity, DetailsActivity::class.java)) }
+        val post = mData.mPosts[position]
+        val photo = mData.mPhotos[Random.nextInt(mData.mPhotos.size - 1)]
+        holder.bind(post, photo)
+        holder.itemView.setOnClickListener {
+            onItemClicked(post, photo)
+        }
     }
 
     fun setData(data: PostAndImages) {
@@ -42,7 +47,7 @@ class PostAdapter(private val mRequestManager: RequestManager, private val mActi
         fun bind (post: Post, photo: Photo){
             title.text = post.title
             body.text = post.body
-            mRequestManager.load(photo.url).into(image)
+            Glide.with(itemView.context).load(photo.thumbnailUrl).into(image)
         }
     }
 
