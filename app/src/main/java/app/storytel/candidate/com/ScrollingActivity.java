@@ -25,6 +25,9 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import app.storytel.candidate.com.network.models.Photo;
+import app.storytel.candidate.com.network.models.Post;
+
 public class ScrollingActivity extends AppCompatActivity {
     private static final String POSTS_URL = "https://jsonplaceholder.typicode.com/posts";
     private static final String PHOTOS_URL = "https://jsonplaceholder.typicode.com/photos";
