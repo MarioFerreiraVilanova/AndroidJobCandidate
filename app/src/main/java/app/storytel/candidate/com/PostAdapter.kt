@@ -1,6 +1,7 @@
 package app.storytel.candidate.com
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,10 @@ import app.storytel.candidate.com.network.models.Photo
 import app.storytel.candidate.com.network.models.Post
 import app.storytel.candidate.com.network.models.PostAndImages
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import java.lang.Exception
 import kotlin.random.Random
 
 class PostAdapter(
@@ -47,7 +52,20 @@ class PostAdapter(
         fun bind (post: Post, photo: Photo){
             title.text = post.title
             body.text = post.body
-            Glide.with(itemView.context).load(photo.thumbnailUrl).into(image)
+            Glide.with(itemView.context)
+                    //.load(photo.thumbnailUrl)
+                    .load(photo.thumbnailUrl.replace("via.placeholder.com", "dummyimage.com")) //This is just for the purpose of showing images in this task since "via.placeholder" returns 410 error codes. This would never go to production.
+                    .listener(object : RequestListener<String, GlideDrawable>{
+                override fun onException(e: Exception?, model: String?, target: Target<GlideDrawable>?, isFirstResource: Boolean): Boolean {
+                    Log.e("PostViewHolder", "Error loading image: ${e?.message}")
+                    return true
+                }
+
+                override fun onResourceReady(resource: GlideDrawable?, model: String?, target: Target<GlideDrawable>?, isFromMemoryCache: Boolean, isFirstResource: Boolean): Boolean {
+                    return false
+                }
+
+            }).into(image)
         }
     }
 

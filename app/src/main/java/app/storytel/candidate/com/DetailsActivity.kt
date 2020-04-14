@@ -15,8 +15,11 @@ import androidx.lifecycle.ViewModelProvider
 import app.storytel.candidate.com.network.models.Comment
 import app.storytel.candidate.com.network.models.Result
 import com.bumptech.glide.Glide
-import com.google.android.material.snackbar.Snackbar
+import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import kotlinx.android.synthetic.main.activity_details.*
+import java.lang.Exception
 
 class DetailsActivity : AppCompatActivity() {
     private val mImageView: ImageView by lazy {
@@ -27,7 +30,7 @@ class DetailsActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.details)
     }
 
-    private val viewModel: DetailsActivityViewModel by lazy {
+    private val mViewModel: DetailsActivityViewModel by lazy {
         ViewModelProvider(this).get(DetailsActivityViewModel::class.java)
     }
 
@@ -84,13 +87,26 @@ class DetailsActivity : AppCompatActivity() {
         //TODO display the selected post from ScrollingActivity. Use mImageView and mTextView for image and body text. Change the title to use the post title
         //TODO load top 3 comments from COMMENTS_URL into the 3 card views
 
-        viewModel.init(intent)
+        mViewModel.init(intent)
 
-        Glide.with(this).load(viewModel.photoUrl).into(mImageView)
-        mTextView.text = viewModel.postBody
-        supportActionBar?.title = viewModel.postTitle
+        Glide.with(this)
+                //.load(mViewModel.photoUrl) // This should be the line to load images. The following line is just for the purpose of this task
+                .load(mViewModel.photoUrl?.replace("via.placeholder.com", "dummyimage.com")) //This is just for the purpose of showing images in this task since "via.placeholder" returns 410 error codes. This would never go to production.
+                .listener(object : RequestListener<String, GlideDrawable> {
+            override fun onException(e: Exception?, model: String?, target: Target<GlideDrawable>?, isFirstResource: Boolean): Boolean {
+                Log.e("PostViewHolder", "Error loading image: ${e?.message}")
+                return true
+            }
 
-        viewModel.getComments().observe(this, Observer {
+            override fun onResourceReady(resource: GlideDrawable?, model: String?, target: Target<GlideDrawable>?, isFromMemoryCache: Boolean, isFirstResource: Boolean): Boolean {
+                return false
+            }
+
+        }).into(mImageView)
+        mTextView.text = mViewModel.postBody
+        supportActionBar?.title = mViewModel.postTitle
+
+        mViewModel.getComments().observe(this, Observer {
             showLoadingIndicator (it.loading)
 
             when (val result = it.result){
@@ -118,7 +134,7 @@ class DetailsActivity : AppCompatActivity() {
                 }
             }
         }else{
-            //TODO There is no comments. As it is right now, no comment cards will be shown. Maybe we should display some kind of view indicating that there are no comments available
+            //TODO There are no comments. As it is right now, no comment cards will be shown. Maybe we should display some kind of view indicating that there are no comments available
         }
     }
 
@@ -143,8 +159,8 @@ class DetailsActivity : AppCompatActivity() {
         }
 
         builder.setNegativeButton(getString(R.string.retry)){ _, _ ->
-            viewModel.postId?.let {
-                viewModel.fetchComments(it)
+            mViewModel.postId?.let {
+                mViewModel.fetchComments(it)
             } ?: run {
                 Log.e("DetailsActivity", "Details activity is running without a post id. This should never happen")
             }

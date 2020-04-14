@@ -14,11 +14,14 @@ class ScrollingActivityViewModel: ViewModel() {
 
     private val api = ApiFactory.getSampleApi()
 
-    private val postsAndImages = MutableLiveData<NetworkResource<PostAndImages>>().also {
-        loadData()
+    private val postsAndImages = MutableLiveData<NetworkResource<PostAndImages>>().apply {
+        this.value = NetworkResource(false, null)
     }
 
     fun getPostsAndImages(): LiveData<NetworkResource<PostAndImages>>{
+        postsAndImages.value?.result ?: run {
+            loadData()
+        }
         return postsAndImages
     }
 
