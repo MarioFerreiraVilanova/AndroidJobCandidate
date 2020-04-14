@@ -150,6 +150,13 @@
 
             </androidx.cardview.widget.CardView>
 
+            <ProgressBar
+                android:id="@+id/loading_comments_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="20dp"
+                android:textAlignment="center"/>
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

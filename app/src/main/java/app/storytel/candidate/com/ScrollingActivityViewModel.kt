@@ -14,8 +14,8 @@ class ScrollingActivityViewModel: ViewModel() {
 
     private val api = ApiFactory.getSampleApi()
 
-    private val postsAndImages = MutableLiveData<NetworkResource<PostAndImages>>().apply {
-        value = NetworkResource(false, null)
+    private val postsAndImages = MutableLiveData<NetworkResource<PostAndImages>>().also {
+        loadData()
     }
 
     fun getPostsAndImages(): LiveData<NetworkResource<PostAndImages>>{
@@ -23,9 +23,9 @@ class ScrollingActivityViewModel: ViewModel() {
     }
 
     fun loadData(){
-        postsAndImages.value = NetworkResource(true, null)
         GlobalScope.launch {
             try {
+                postsAndImages.postValue(NetworkResource(true, null))
                 when (val posts = fetchPosts()){
                     is Result.Success -> {
                         when (val images = fetchPhotos()){
